@@ -28,14 +28,46 @@ describe 'wag' do
     end
   end
 
+  def validate_help(s)
+
+    ss = s.split("\n")
+
+    ss.find { |l| l.match(/ wag NICK poweroff /) } &&
+    ss.find { |l| l.match(/ Hard VBoxManage poweroff /) }
+  end
+
   describe 'wag -h' do
 
-    it 'prints the usage'
+    it 'prints the usage' do
+
+      r = wag '-h'
+
+      #puts "-" * 80
+      #puts r
+      #puts "-" * 80
+
+      validate_help(r).should be_true
+    end
+  end
+
+  describe 'wag --help' do
+
+    it 'prints the usage' do
+
+      r = wag '--help'
+
+      validate_help(r).should be_true
+    end
   end
 
   describe 'wag help' do
 
-    it 'prints the usage'
+    it 'prints the usage' do
+
+      r = wag 'help'
+
+      validate_help(r).should be_true
+    end
   end
 
   describe 'wag _env' do

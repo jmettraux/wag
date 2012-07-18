@@ -33,16 +33,9 @@ class Wag
 
   SELF = File.basename($0)
 
+  DOC = {}
+
   class Vm < Struct.new(:nick, :name, :uuid)
-  end
-
-  def print_usage
-
-    puts %Q{
-#{SELF} USAGE:
-
-TODO
-    }
   end
 
   def vms
@@ -131,12 +124,32 @@ TODO
   end
 
   #
-  # the commands
+  # the commands and their helpers
+
+  def print_usage
+
+    s = []
+    s << ""
+    s << "#{SELF} USAGE:"
+    s << ""
+    DOC.sort_by { |k, v| k }.each do |k, (rmeth, sig, lines)|
+      s << "  #{sig}"
+      lines.each do |l|
+        s << "    #{l}"
+      end
+      s << ""
+    end
+    s << ""
+    puts s.join("\n")
+  end
 
   def wf_help(args)
 
     print_usage
   end
+
+  alias wf__h wf_help
+  alias wf___help wf_help
 
   def wf__v(args)
 
@@ -161,7 +174,7 @@ TODO
     end
   end
 
-  # TODO: document me
+  # Hard VBoxManage poweroff for a vm
   #
   def mm_poweroff(vm, args)
 
@@ -217,6 +230,49 @@ TODO
       end
     }
   end
+
+  #--
+  # documentation parser
+  #++
+
+  def self.parse_doc
+
+    rmeths = instance_methods.select { |m|
+      PREFIXES.find { |pref| m.to_s.match(/^#{pref}/) }
+    }
+
+    lines = File.readlines(__FILE__)
+
+    rmeths.each do |rmeth|
+
+      ls = lines.take_while { |l|
+        ! (l.match(/^  def #{rmeth}\(/) || l.match(/^  alias #{rmeth} /))
+      }
+
+      ls = [] if ls == lines
+
+      ls = ls.reverse.take_while { |l| l.match(/^  #/) }.reverse
+
+      ls = ls.collect { |l| l[4..-1].strip }
+      ls.pop if ls.last == ''
+
+      next if ls.empty?
+
+      pref = rmeth[0, 3]
+      name = rmeth[3..-1].gsub(/_/, '-')
+
+      sig = case rmeth[0, 3]
+        when 'vf_', 'mf_', 'wf_'
+          "#{SELF} #{name} ARGS*"
+        when 'vm_', 'mm_'
+          "#{SELF} NICK #{name} ARGS*"
+      end
+
+      DOC[name] = [ rmeth, sig, ls ]
+    end
+  end
+
+  parse_doc
 end
 
 Wag.new.run #if $0 == __FILE__
