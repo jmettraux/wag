@@ -159,6 +159,16 @@ redhat5_2
     end
   end
 
+  describe 'wag vm ssh -c ls' do
+
+    it 'outputs the result of the remote command' do
+
+      r = wag 'vm ssh -c ls'
+
+      r.should == "-vagrant #{SDIR}/fixtures/vagdir/vm ssh -c ls"
+    end
+  end
+
   describe 'wag vm poweroff' do
 
     it 'powers off the vm' do
