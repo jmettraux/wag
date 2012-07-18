@@ -168,5 +168,15 @@ redhat5_2
       r.should == "-vboxmanage controlvm vm_1234 poweroff"
     end
   end
+
+  describe 'wag vm network' do
+
+    it 'displays the network settings out of the Vagrantfile' do
+
+      r = wag 'vm network'
+
+      r.should == "config.vm.network :hostonly, '10.0.2.7'"
+    end
+  end
 end
 

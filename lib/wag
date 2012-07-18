@@ -27,7 +27,7 @@ class Wag
 
   VERSION = '1.0.0'
 
-  VHOME = ENV['WAG_HOME'] || '~/vagrant'
+  VHOME = File.expand_path(ENV['WAG_HOME'] || '~/vagrant')
   VMAN = ENV['WAG_VMAN'] || `which VBoxManage`.strip
   VAG = ENV['WAG_VAG'] || `which vagrant`.strip
 
@@ -88,7 +88,7 @@ class Wag
     exec("#{VMAN} #{args.join(' ')}")
   end
 
-  PREFIXES = %w[ vm_ vf_ mm_ mf_ wf_ ]
+  PREFIXES = %w[ vm_ vf_ mm_ mf_ wm_ wf_ ]
 
   def lookup_rmeths(args)
 
@@ -293,6 +293,17 @@ class Wag
     # TODO: pass trailing args (-c for example...)
 
     vagrant_method(vm.nick, 'ssh')
+  end
+
+  # greps the vm network setting out of its Vagrantfile
+  #
+  def wm_network(vm)
+
+    File.readlines(File.join(VHOME, vm.nick, 'Vagrantfile')).select { |l|
+      l.match(/^\s+config.vm.network /)
+    }.each { |l|
+      echo(l.strip)
+    }
   end
 
   #--
