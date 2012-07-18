@@ -28,13 +28,27 @@ describe 'wag' do
     end
   end
 
+  def assert(x)
+
+    return true if x
+
+    line = caller.first.match(/rb:(\d+):in /)[1].to_i
+
+    raise(
+      "failed assertion: " +
+      "line #{line}: " +
+      File.readlines(__FILE__)[line - 1])
+  end
+
   def validate_help(s)
 
     ss = s.split("\n")
 
-    ss.find { |l| l.match(/ wag NICK poweroff /) } &&
-    ss.find { |l| l.match(/ hard VBoxManage poweroff /) } &&
-    ( ! ss.find { |l| l.match(/ :nodoc: /) })
+    assert ss.find { |l| l.match(/ wag -v$/) }
+    assert ss.find { |l| l.match(/ wag NICK poweroff/) }
+    assert ss.find { |l| l.match(/ hard VBoxManage poweroff /) }
+    assert ( ! ss.find { |l| l.match(/ :nodoc: /) })
+    assert ( ! ss.find { |l| l.match(/ wag -v ARGS\*$/) })
   end
 
   describe 'wag -h' do
@@ -43,11 +57,7 @@ describe 'wag' do
 
       r = wag '-h'
 
-      #puts "-" * 80
-      #puts r
-      #puts "-" * 80
-
-      validate_help(r).should be_true
+      validate_help(r).should == true
     end
   end
 

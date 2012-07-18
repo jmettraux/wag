@@ -107,11 +107,23 @@ class Wag
 
     if vm && m = get_method(rmeths[1])
 
-      send(m, vm, ARGV[1..-1])
+      rmeth = method(m)
+
+      if rmeth.arity == 2
+        send(m, vm, ARGV[1..-1])
+      else
+        send(m, vm)
+      end
 
     elsif f = rmeths.find { |rms| get_function(rms) }
 
-      send(f.first, ARGV[1..-1])
+      rmeth = method(f.first)
+
+      if rmeth.arity == 1
+        send(f.first, ARGV[1..-1])
+      else
+        send(f.first)
+      end
 
     else
 
@@ -145,7 +157,7 @@ class Wag
 
   # prints the help (aliased to "wag -h" and "wag --help")
   #
-  def wf_help(args)
+  def wf_help
 
     print_usage
   end
@@ -155,14 +167,14 @@ class Wag
 
   # prints the version of this wag tool
   #
-  def wf__v(args)
+  def wf__v
 
     puts VERSION
   end
 
   alias wf___version wf__v
 
-  def wf__env(args)
+  def wf__env
 
     ENV.select { |k, v|
       k.match(/^WAG_/)
@@ -173,7 +185,7 @@ class Wag
 
   # :nodoc: hidden function
   #
-  def wf__consts(args)
+  def wf__consts
 
     self.class.constants.sort.each do |con|
       puts "#{con}: #{self.class.const_get(con).inspect}"
@@ -182,7 +194,7 @@ class Wag
 
   # hard VBoxManage poweroff for a vm
   #
-  def mm_poweroff(vm, args)
+  def mm_poweroff(vm)
 
     vman_function('controlvm', vm.name, 'poweroff')
   end
@@ -205,7 +217,7 @@ class Wag
 
   # lists vms managed by Oracle's VirtualBox / Vagrant
   #
-  def wf_vms(args)
+  def wf_vms
 
     format = "%-19s %-19s %-19s\n"
 
@@ -218,7 +230,7 @@ class Wag
 
   # a shortcut to "wag box list"
   #
-  def vf_boxes(args)
+  def vf_boxes
 
     vagrant_function('box', 'list')
   end
@@ -235,36 +247,43 @@ class Wag
   #
   def vm_up_and_ssh(vm, args)
 
+    # TODO: pass trailing args (-c for example...)
+
     vagrant_method(vm.nick, 'up', 'ssh')
   end
 
   # makes sure a vm is up
   #
-  def vm_up(vm, args); vagrant_method(vm.nick, 'up'); end
+  def vm_up(vm); vagrant_method(vm.nick, 'up'); end
 
   # suspends a vm
   #
-  def vm_suspend(vm, args); vagrant_method(vm.nick, 'suspend'); end
+  def vm_suspend(vm); vagrant_method(vm.nick, 'suspend'); end
 
   # resumes a [suspended] vm
   #
-  def vm_resume(vm, args); vagrant_method(vm.nick, 'resume'); end
+  def vm_resume(vm); vagrant_method(vm.nick, 'resume'); end
 
   # print the status of a vm
   #
-  def vm_status(vm, args); vagrant_method(vm.nick, 'status'); end
+  def vm_status(vm); vagrant_method(vm.nick, 'status'); end
 
   # halts a vm
   #
-  def vm_halt(vm, args); vagrant_method(vm.nick, 'halt'); end
-
-  # sshs into a vm
-  #
-  def vm_ssh(vm, args); vagrant_method(vm.nick, 'ssh'); end
+  def vm_halt(vm); vagrant_method(vm.nick, 'halt'); end
 
   # outputs the "~/.ssh/config"-ok lines for a vm
   #
-  def vm_ssh_config(vm, args); vagrant_method(vm.nick, 'ssh_config'); end
+  def vm_ssh_config(vm); vagrant_method(vm.nick, 'ssh_config'); end
+
+  # sshs into a vm
+  #
+  def vm_ssh(vm, args)
+
+    # TODO: pass trailing args (-c for example...)
+
+    vagrant_method(vm.nick, 'ssh')
+  end
 
   #--
   # documentation parser
@@ -272,16 +291,16 @@ class Wag
 
   def self.parse_doc
 
+    lines = File.readlines(__FILE__)
+
     rmeths = instance_methods.select { |m|
       PREFIXES.find { |pref| m.to_s.match(/^#{pref}/) }
     }
 
-    lines = File.readlines(__FILE__)
-
     rmeths.each do |rmeth|
 
       ls = lines.take_while { |l|
-        ! (l.match(/^  def #{rmeth}\(/) || l.match(/^  alias #{rmeth} /))
+        ! (l.match(/^  def #{rmeth}\b/) || l.match(/^  alias #{rmeth} /))
       }
 
       ls = [] if ls == lines
@@ -297,13 +316,17 @@ class Wag
 
       pref = rmeth[0, 3]
       name = rmeth[3..-1].gsub(/_/, '-')
+      meth = !!rmeth.match(/^.m_/)
 
-      sig = case rmeth[0, 3]
-        when 'vf_', 'mf_', 'wf_'
-          "#{SELF} #{name} ARGS*"
-        when 'vm_', 'mm_'
-          "#{SELF} NICK #{name} ARGS*"
-      end
+      arity = instance_method(rmeth).arity
+      arity = arity - 1 if meth
+
+      sig = [
+        SELF,
+        meth ? "NICK" : nil,
+        name,
+        arity == 1 ? "ARGS*" : nil
+      ].compact.join(' ')
 
       DOC[sig] = [ rmeth, sig, ls ]
     end
