@@ -53,9 +53,20 @@ class Wag
     vms.find { |vm| vm.name == s || vm.nick == s }
   end
 
+  # Blue...
+  #
+  def echo(s)
+
+    if STDOUT.tty?
+      puts("[34m#{s}[0m")
+    else
+      puts(s)
+    end
+  end
+
   def exec(com)
 
-    puts(com)
+    echo(com)
     Kernel.exec(com)
   end
 
@@ -152,7 +163,7 @@ class Wag
       s << ""
     end
     s << ""
-    puts s.join("\n")
+    echo s.join("\n")
   end
 
   # prints the help (aliased to "wag -h" and "wag --help")
@@ -169,7 +180,7 @@ class Wag
   #
   def wf__v
 
-    puts VERSION
+    echo VERSION
   end
 
   alias wf___version wf__v
@@ -179,7 +190,7 @@ class Wag
     ENV.select { |k, v|
       k.match(/^WAG_/)
     }.sort.each { |k, v|
-      puts "#{k}: #{v.inspect}"
+      echo "#{k}: #{v.inspect}"
     }
   end
 
@@ -188,7 +199,7 @@ class Wag
   def wf__consts
 
     self.class.constants.sort.each do |con|
-      puts "#{con}: #{self.class.const_get(con).inspect}"
+      echo "#{con}: #{self.class.const_get(con).inspect}"
     end
   end
 

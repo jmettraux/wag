@@ -5,6 +5,8 @@ A helper script around the "vagrant" and "VBoxManage" commands.
 
 [Vagrant](http://vagrantup.com) and [Oracle's VirtualBox](http://www.virtualbox.org/).
 
+Tested with Vagrant 1.0.3.
+
 
 ## usage ##
 
