@@ -12,12 +12,14 @@ WAG_VERSION = File.read(
 
 module WagHelper
 
-  def wag(line)
+  def wag(line, dir=false)
 
     ENV['WAG_TEST'] = 'true'
     ENV['WAG_HOME'] = "#{SDIR}/fixtures/vagdir"
     ENV['WAG_VMAN'] = "bundle exec ruby #{SDIR}/faker.rb -vboxmanage"
     ENV['WAG_VAG'] = "bundle exec ruby #{SDIR}/faker.rb -vagrant"
+
+    dir = dir && File.join(ENV['WAG_HOME'], 'vm')
 
     w = File.expand_path('../../lib/wag', __FILE__)
 
@@ -27,7 +29,13 @@ module WagHelper
       line
     end
 
-    `#{w} #{args} 2>&1`.strip
+    if dir
+      #puts "cd #{dir} && #{w} #{args} 2>&1"
+      `cd #{dir} && #{w} #{args} 2>&1`.strip
+    else
+      #puts "#{w} #{args} 2>&1"
+      `#{w} #{args} 2>&1`.strip
+    end
   end
 end
 

@@ -23,6 +23,7 @@
 # Made in Japan.
 
 require 'pp'
+require 'fileutils'
 
 
 class Wag
@@ -55,6 +56,13 @@ class Wag
     vms.find { |vm| vm.name == s || vm.nick == s }
   end
 
+  def lookup_local_vm
+
+    return unless File.exists?('Vagrantfile')
+
+    lookup_vm(FileUtils.pwd.split('/').last)
+  end
+
   def blue(s)
 
     STDOUT.tty? ? "[34m#{s}[0m" : s
@@ -72,6 +80,8 @@ class Wag
   end
 
   def vagrant_method(vm, *commands)
+
+    commands.compact!
 
     rest = commands.last.is_a?(Array) ? commands.pop : []
 
@@ -119,29 +129,36 @@ class Wag
     return print_usage if ARGV.size < 1
 
     vm = lookup_vm(ARGV[0])
+    localvm = lookup_local_vm
+    localvm = nil if vm
 
     ARGV << 'up_and_ssh' if vm && ARGV[1].nil?
 
     rmeths = lookup_rmeths(ARGV)
+    meth = get_method(localvm ? rmeths[0] : rmeths[1])
+    func = rmeths.find { |rms| get_function(rms) }
+    func = func.first if func
 
-    if vm && m = get_method(rmeths[1])
+    vm ||= localvm
 
-      rmeth = method(m)
+    if vm && meth
+
+      rmeth = method(meth)
 
       if rmeth.arity == 2
-        send(m, vm, ARGV[1..-1])
+        send(meth, vm, ARGV[1..-1])
       else
-        send(m, vm)
+        send(meth, vm)
       end
 
-    elsif f = rmeths.find { |rms| get_function(rms) }
+    elsif func
 
-      rmeth = method(f.first)
+      rmeth = method(func)
 
       if rmeth.arity == 1
-        send(f.first, ARGV[1..-1])
+        send(func, ARGV[1..-1])
       else
-        send(f.first)
+        send(func)
       end
 
     else

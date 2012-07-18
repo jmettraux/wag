@@ -225,5 +225,19 @@ config.vm.network :hostonly, '10.0.2.7'
       }.strip
     end
   end
+
+  context 'when next to the Vagrantfile' do
+
+    describe 'wag ssh' do
+
+      it 'sshs into the vm' do
+
+        r = wag 'ssh', true
+
+        r.should ==
+          "-vagrant /Users/jmettraux/w/wag/spec/fixtures/vagdir/vm ssh"
+      end
+    end
+  end
 end
 
