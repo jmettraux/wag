@@ -33,7 +33,8 @@ describe 'wag' do
     ss = s.split("\n")
 
     ss.find { |l| l.match(/ wag NICK poweroff /) } &&
-    ss.find { |l| l.match(/ Hard VBoxManage poweroff /) }
+    ss.find { |l| l.match(/ hard VBoxManage poweroff /) } &&
+    ( ! ss.find { |l| l.match(/ :nodoc: /) })
   end
 
   describe 'wag -h' do

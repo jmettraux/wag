@@ -111,7 +111,7 @@ class Wag
 
     elsif f = rmeths.find { |rms| get_function(rms) }
 
-      send(f.first, ARGV)
+      send(f.first, ARGV[1..-1])
 
     else
 
@@ -143,6 +143,8 @@ class Wag
     puts s.join("\n")
   end
 
+  # prints the help (aliased to "wag -h" and "wag --help")
+  #
   def wf_help(args)
 
     print_usage
@@ -151,6 +153,8 @@ class Wag
   alias wf__h wf_help
   alias wf___help wf_help
 
+  # prints the version of this wag tool
+  #
   def wf__v(args)
 
     puts VERSION
@@ -167,6 +171,8 @@ class Wag
     }
   end
 
+  # :nodoc: hidden function
+  #
   def wf__consts(args)
 
     self.class.constants.sort.each do |con|
@@ -174,7 +180,7 @@ class Wag
     end
   end
 
-  # Hard VBoxManage poweroff for a vm
+  # hard VBoxManage poweroff for a vm
   #
   def mm_poweroff(vm, args)
 
@@ -197,6 +203,8 @@ class Wag
 #    vman_function(flatten(:vm, args))
 #  end
 
+  # lists vms managed by Oracle's VirtualBox / Vagrant
+  #
   def wf_vms(args)
 
     format = "%-19s %-19s %-19s\n"
@@ -208,28 +216,55 @@ class Wag
     end
   end
 
-  %w[ box ].each do |c|
+  # a shortcut to "wag box list"
+  #
+  def vf_boxes(args)
 
-    class_eval %Q{
-      def vf_#{c}(args)
-        vagrant_function(*[ #{c.inspect}, *args ])
-      end
-    }
+    vagrant_function('box', 'list')
   end
 
+  # calls up "vagrant box ARGS*"
+  #
+  def vf_box(args)
+
+    vagrant_function(*[ 'box', *args ])
+  end
+
+  # makes sure a vm is up and then SSHs into it
+  # shortcut: wag NICK
+  #
   def vm_up_and_ssh(vm, args)
 
     vagrant_method(vm.nick, 'up', 'ssh')
   end
 
-  %w[ up suspend resume status halt ssh ssh_config ].each do |c|
+  # makes sure a vm is up
+  #
+  def vm_up(vm, args); vagrant_method(vm.nick, 'up'); end
 
-    class_eval %Q{
-      def vm_#{c}(vm, args)
-        vagrant_method(vm.nick, #{c.inspect})
-      end
-    }
-  end
+  # suspends a vm
+  #
+  def vm_suspend(vm, args); vagrant_method(vm.nick, 'suspend'); end
+
+  # resumes a [suspended] vm
+  #
+  def vm_resume(vm, args); vagrant_method(vm.nick, 'resume'); end
+
+  # print the status of a vm
+  #
+  def vm_status(vm, args); vagrant_method(vm.nick, 'status'); end
+
+  # halts a vm
+  #
+  def vm_halt(vm, args); vagrant_method(vm.nick, 'halt'); end
+
+  # sshs into a vm
+  #
+  def vm_ssh(vm, args); vagrant_method(vm.nick, 'ssh'); end
+
+  # outputs the "~/.ssh/config"-ok lines for a vm
+  #
+  def vm_ssh_config(vm, args); vagrant_method(vm.nick, 'ssh_config'); end
 
   #--
   # documentation parser
@@ -256,6 +291,8 @@ class Wag
       ls = ls.collect { |l| l[4..-1].strip }
       ls.pop if ls.last == ''
 
+      ls = [] if ls.find { |l| l.match(/:nodoc:/) }
+
       next if ls.empty?
 
       pref = rmeth[0, 3]
@@ -268,12 +305,17 @@ class Wag
           "#{SELF} NICK #{name} ARGS*"
       end
 
-      DOC[name] = [ rmeth, sig, ls ]
+      DOC[sig] = [ rmeth, sig, ls ]
     end
+
+    DOC['wag NICK'] = [
+      'wf_up_and_ssh', 'wag NICK', [ 'shortcut for "wag NICK up-and-ssh"' ]
+    ]
   end
 
   parse_doc
 end
 
 Wag.new.run #if $0 == __FILE__
+  # no need for the $0 trick as this file is never supposed to be required
 
