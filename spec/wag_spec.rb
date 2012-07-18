@@ -103,7 +103,7 @@ describe 'wag' do
 
   describe 'wag vms' do
 
-    it 'print the list of managed vms' do
+    it 'prints the list of managed vms' do
 
       r = wag 'vms'
 
@@ -116,7 +116,15 @@ vm                  vm_1234             12345678-1234-1234-1234-123456789000
 
   describe 'wag boxes' do
 
-    it 'flips burgers'
+    it 'prints the list of boxes available' do
+
+      r = wag 'boxes'
+
+      r.should == %{
+squeeze64
+redhat5_2
+      }.strip
+    end
   end
 
   describe 'wag vm' do
@@ -126,8 +134,8 @@ vm                  vm_1234             12345678-1234-1234-1234-123456789000
       r = wag 'vm'
 
       rr = r.split("\n")
-      rr[0].should == "#{SDIR}/fixtures/vagdir/vm up"
-      rr[1].should == "#{SDIR}/fixtures/vagdir/vm ssh"
+      rr[0].should == "-vagrant #{SDIR}/fixtures/vagdir/vm up"
+      rr[1].should == "-vagrant #{SDIR}/fixtures/vagdir/vm ssh"
     end
   end
 
@@ -137,7 +145,7 @@ vm                  vm_1234             12345678-1234-1234-1234-123456789000
 
       r = wag 'vm ssh'
 
-      r.should == "#{SDIR}/fixtures/vagdir/vm ssh"
+      r.should == "-vagrant #{SDIR}/fixtures/vagdir/vm ssh"
     end
   end
 end
