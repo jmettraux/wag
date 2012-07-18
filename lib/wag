@@ -53,15 +53,14 @@ class Wag
     vms.find { |vm| vm.name == s || vm.nick == s }
   end
 
-  # Blue...
-  #
+  def blue(s)
+
+    STDOUT.tty? ? "[34m#{s}[0m" : s
+  end
+
   def echo(s)
 
-    if STDOUT.tty?
-      puts("[34m#{s}[0m")
-    else
-      puts(s)
-    end
+    puts(s)
   end
 
   def exec(com)
@@ -230,7 +229,7 @@ class Wag
   #
   def wf_vms
 
-    format = "%-19s %-19s %-19s\n"
+    format = blue("%-19s %-19s %s\n")
 
     printf(format, *%w[ NICK NAME UUID ])
 

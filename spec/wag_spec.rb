@@ -101,6 +101,24 @@ describe 'wag' do
     end
   end
 
+  describe 'wag vms' do
+
+    it 'print the list of managed vms' do
+
+      r = wag 'vms'
+
+      r.should == %{
+NICK                NAME                UUID
+vm                  vm_1234             12345678-1234-1234-1234-123456789000
+      }.strip
+    end
+  end
+
+  describe 'wag boxes' do
+
+    it 'flips burgers'
+  end
+
   describe 'wag vm' do
 
     it 'makes sure the vm is up and then sshs into it' do
