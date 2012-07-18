@@ -44,7 +44,7 @@ describe 'wag' do
 
       r = wag '_consts'
 
-      r.split("\n").last.should match(/faker\.rb -vboxmanage"$/)
+      r.split("\n")[-2].should match(/faker\.rb -vboxmanage"$/)
     end
   end
 

@@ -40,26 +40,31 @@ class Wag
 
   SELF = File.basename($0)
 
+  class Vm < Struct.new(:nick, :name, :uuid)
+  end
+
   def print_usage
 
     puts %Q{
 #{SELF} USAGE:
 
-- nada
+TODO
     }
   end
 
-  def list_vms
+  def vms
 
     `#{VMAN} list vms`.split("\n").collect { |line|
-      m = line.match(/^"([^"]+)"/)
-      m ? m[1] : nil
+      m = line.match(/^"([^"]+)" \{([^\}]+)\}$/)
+      m ? Vm.new(m[1].split('_').first, m[1], m[2]) : nil
     }.compact
   end
 
+  # Returns a Vm instance if there is one with the given name or nick.
+  #
   def lookup_vm(s)
 
-    list_vms.find { |vm| vm == s || vm.match(/^#{s}_/) }
+    vms.find { |vm| vm.name == s || vm.nick == s }
   end
 
   def exec(com)
@@ -87,31 +92,47 @@ class Wag
     exec("#{VMAN} #{args.join(' ')}")
   end
 
+  PREFIXES = %w[ vm_ vf_ mm_ mf_ wf_ ]
+
+  def lookup_rmeths(args)
+
+    args[0, 2].collect do |a|
+      PREFIXES.collect { |pref|
+        meth = pref + a.gsub(/-/, '_')
+        self.respond_to?(meth) ? meth : nil
+      }.compact
+    end
+  end
+
+  def get_method(a); (a || []).find { |e| e.match(/^.m_/) }; end
+  def get_function(a); (a || []).find { |e| e.match(/^.f_/) }; end
+
+  # The "run" method
+  #
   def run
 
-    if ARGV.size < 1
-      print_usage; return
-    end
+    return print_usage if ARGV.size < 1
 
     vm = lookup_vm(ARGV[0])
 
-    comm, args = if vm
-      [ ARGV[1], [ [ ARGV[0], vm ] ] + Array(ARGV[2..-1]) ]
+    ARGV << 'up_and_ssh' if vm && ARGV[1].nil?
+
+    rmeths = lookup_rmeths(ARGV)
+
+    if vm && m = get_method(rmeths[1])
+
+      send(m, vm, ARGV[1..-1])
+
+    elsif f = rmeths.find { |rms| get_function(rms) }
+
+      send(f.first, ARGV)
+
     else
-      [ ARGV[0], ARGV[1..-1] ]
-    end
 
-    comm ||= 'up_and_ssh' if vm
-    comm = comm.gsub(/-/, '_')
-
-    if respond_to?(comm)
-
-      send(comm, args)
-
-    else
+      com = vm ? ARGV[1] : ARGV[0]
 
       raise ArgumentError.new(
-        "unknown command #{comm.inspect} " +
+        "unknown command #{com.inspect} " +
         "- try running \"#{SELF} help\"")
     end
   end
@@ -119,73 +140,78 @@ class Wag
   #
   # the commands
 
-  def help(args)
+  def wf_help(args)
 
-    # TODO
+    print_usage
   end
 
-  def _v(args)
+  def wf__v(args)
 
     puts VERSION
   end
 
-  alias __version _v
+  alias wf___version wf__v
 
-  def _consts(args)
+  def wf__consts(args)
 
     self.class.constants.sort.each do |con|
       puts "#{con}: #{self.class.const_get(con).inspect}"
     end
   end
 
-  def poweroff(args)
+  # TODO: document me
+  #
+  def mm_poweroff(vm, args)
 
-    nick, vm = args.first
-    vman_function('controlvm', vm, 'poweroff')
+    vman_function('controlvm', vm.name, 'poweroff')
   end
 
-  def flatten(type, args)
+#  def flatten(type, args)
+#
+#    args.collect { |e|
+#      if e.is_a?(Array)
+#        type == :nick ? e.first : e.last
+#      else
+#        e
+#      end
+#    }
+#  end
+#
+#  def man(args)
+#
+#    vman_function(flatten(:vm, args))
+#  end
 
-    args.collect { |e|
-      if e.is_a?(Array)
-        type == :nick ? e.first : e.last
-      else
-        e
-      end
-    }
-  end
+  def wf_vms(args)
 
-  def man(args)
+    format = "%-19s %-19s %-19s\n"
 
-    vman_function(flatten(:vm, args))
-  end
+    printf(format, *%w[ NICK NAME UUID ])
 
-  def vms(args)
-
-    list_vms.each { |vm| puts vm }
+    vms.each do |vm|
+      printf(format, *[ vm.nick, vm.name, vm.uuid ])
+    end
   end
 
   %w[ box ].each do |c|
 
     class_eval %Q{
-      def #{c}(args)
+      def vf_#{c}(args)
         vagrant_function(*[ #{c.inspect}, *args ])
       end
     }
   end
 
-  def up_and_ssh(args)
+  def vm_up_and_ssh(vm, args)
 
-    nick, vm = args.first
-    vagrant_method(nick, 'up', 'ssh')
+    vagrant_method(vm.nick, 'up', 'ssh')
   end
 
   %w[ up suspend resume status halt ssh ssh_config ].each do |c|
 
     class_eval %Q{
-      def #{c}(args)
-        nick, vm = args.first
-        vagrant_method(nick, #{c.inspect})
+      def vm_#{c}(vm, args)
+        vagrant_method(vm.nick, #{c.inspect})
       end
     }
   end
