@@ -38,9 +38,19 @@ describe 'wag' do
     it 'prints the usage'
   end
 
+  describe 'wag _env' do
+
+    it 'prints WAG_ environment variables' do
+
+      r = wag '_env'
+
+      r.split("\n").first.should == "WAG_HOME: \"#{SDIR}/fixtures/vagdir\""
+    end
+  end
+
   describe 'wag _consts' do
 
-    it 'returns info about the wag constants' do
+    it 'prints info about the wag constants' do
 
       r = wag '_consts'
 

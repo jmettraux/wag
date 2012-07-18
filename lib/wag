@@ -145,6 +145,15 @@ TODO
 
   alias wf___version wf__v
 
+  def wf__env(args)
+
+    ENV.select { |k, v|
+      k.match(/^WAG_/)
+    }.sort.each { |k, v|
+      puts "#{k}: #{v.inspect}"
+    }
+  end
+
   def wf__consts(args)
 
     self.class.constants.sort.each do |con|
