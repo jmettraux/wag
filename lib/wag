@@ -150,19 +150,17 @@ class Wag
 
   def print_usage
 
-    s = []
-    s << ""
-    s << "#{SELF} USAGE:"
-    s << ""
+    puts
+    echo "#{SELF} USAGE:"
+    puts
     DOC.sort_by { |k, v| k }.each do |k, (rmeth, sig, lines)|
-      s << "  #{sig}"
+      echo "  #{sig}"
       lines.each do |l|
-        s << "    #{l}"
+        puts "    #{l}"
       end
-      s << ""
+      puts
     end
-    s << ""
-    echo s.join("\n")
+    puts
   end
 
   # prints the help (aliased to "wag -h" and "wag --help")
@@ -355,9 +353,9 @@ class Wag
 
       sig = [
         SELF,
-        meth ? "NICK" : nil,
+        meth ? 'NICK' : nil,
         name,
-        arity == 1 ? "ARGS*" : nil
+        arity == 1 ? 'ARGS*' : nil
       ].compact.join(' ')
 
       DOC[sig] = [ rmeth, sig, ls ]
