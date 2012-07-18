@@ -6,7 +6,7 @@
 require 'fileutils'
 
 flavour = ARGV.shift
-rest = ARGV.join(' ')
+rest = ARGV.collect { |e| e.match(/\s/) ? e.inspect : e }.join(' ')
 
 if flavour == '-vboxmanage'
 

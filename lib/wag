@@ -75,9 +75,14 @@ class Wag
 
     rest = commands.last.is_a?(Array) ? commands.pop : []
 
-    exec(commands.inject([ "cd #{VHOME}/#{vm}" ]) { |a, c|
-      a << "#{VAG} #{c.gsub(/_/, '-')}"
-    }.join(' && ') + ' ' + rest.join(' '))
+    exec(
+      commands.inject([ "cd #{VHOME}/#{vm}" ]) { |a, c|
+        a << "#{VAG} #{c.gsub(/_/, '-')}"
+      }.join(' && ') +
+      ' ' +
+      rest.collect { |e|
+        e.index(' ') ? e.inspect : e
+      }.join(' '))
   end
 
   def vagrant_function(*args)

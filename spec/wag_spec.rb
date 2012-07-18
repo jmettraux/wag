@@ -169,6 +169,17 @@ redhat5_2
     end
   end
 
+  describe 'wag vm ssh -c "ls -al"' do
+
+    it 'outputs the result of the remote command' do
+
+      #r = wag [ 'vm', 'ssh', '-c', 'ls -al' ]
+      r = wag 'vm ssh -c "ls -al"'
+
+      r.should == "-vagrant #{SDIR}/fixtures/vagdir/vm ssh -c \"ls -al\""
+    end
+  end
+
   describe 'wag vm poweroff' do
 
     it 'powers off the vm' do

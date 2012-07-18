@@ -21,7 +21,13 @@ module WagHelper
 
     w = File.expand_path('../../lib/wag', __FILE__)
 
-    `#{w} #{Array(line).join(' ')} 2>&1`.strip
+    args = if line.is_a?(Array)
+      line.collect { |a| a.match(/\s/) ? a.inspect : a }.join(' ')
+    else
+      line
+    end
+
+    `#{w} #{args} 2>&1`.strip
   end
 end
 
