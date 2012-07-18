@@ -139,6 +139,16 @@ redhat5_2
     end
   end
 
+  describe 'wag vm ssh-config' do
+
+    it 'prints the ssh-config for the vm' do
+
+      r = wag 'vm ssh-config'
+
+      r.should == "-vagrant #{SDIR}/fixtures/vagdir/vm ssh-config"
+    end
+  end
+
   describe 'wag vm ssh' do
 
     it 'sshs into the vm' do

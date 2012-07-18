@@ -60,7 +60,7 @@ class Wag
 
   def echo(s)
 
-    puts(s)
+    puts(blue(s))
   end
 
   def exec(com)
@@ -72,7 +72,7 @@ class Wag
   def vagrant_method(vm, *commands)
 
     exec(commands.inject([ "cd #{VHOME}/#{vm}" ]) { |a, c|
-      a << "#{VAG} #{c}"
+      a << "#{VAG} #{c.gsub(/_/, '-')}"
     }.join(' && '))
   end
 
