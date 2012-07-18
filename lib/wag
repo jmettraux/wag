@@ -287,6 +287,10 @@ class Wag
   #
   def vm_halt(vm); vagrant_method(vm.nick, 'halt'); end
 
+  # an alias for "wag NICK halt"
+  #
+  alias vm_down vm_halt
+
   # outputs the "~/.ssh/config"-ok lines for a vm
   #
   def vm_ssh_config(vm); vagrant_method(vm.nick, 'ssh_config'); end

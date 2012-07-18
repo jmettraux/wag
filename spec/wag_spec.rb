@@ -139,6 +139,16 @@ redhat5_2
     end
   end
 
+  describe 'wag vm down' do
+
+    it 'is an alias for wag vm halt' do
+
+      r = wag 'vm down'
+
+      r.should == "-vagrant #{SDIR}/fixtures/vagdir/vm halt"
+    end
+  end
+
   describe 'wag vm ssh-config' do
 
     it 'prints the ssh-config for the vm' do
