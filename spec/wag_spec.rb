@@ -50,7 +50,14 @@ describe 'wag' do
 
   describe 'wag vm' do
 
-    it 'makes sure the vm is up and then sshs into it'
+    it 'makes sure the vm is up and then sshs into it' do
+
+      r = wag 'vm'
+
+      rr = r.split("\n")
+      rr[0].should == "#{SDIR}/fixtures/vagdir/vm up"
+      rr[1].should == "#{SDIR}/fixtures/vagdir/vm ssh"
+    end
   end
 
   describe 'wag vm ssh' do
