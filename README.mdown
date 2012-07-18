@@ -1,0 +1,30 @@
+
+# wag #
+
+A helper script around the "vagrant" and "VBoxManage" commands.
+
+[Vagrant](http://vagrantup.com) and [Oracle's VirtualBox](http://www.virtualbox.org/).
+
+
+## usage ##
+
+Wag assumes you have a structure like
+
+    /Users/jdoe/vagrant
+    ├── work0
+    │   ├── Vagrantfile
+    │   └── stuff.txt
+    ├── test
+    │   └── Vagrantfile
+    └── test2
+        └── Vagrantfile
+
+for your Vagrant vms.
+
+TODO.
+
+
+## license ##
+
+MIT (see LICENSE.txt)
+

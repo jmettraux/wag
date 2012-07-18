@@ -1,0 +1,195 @@
+#!/usr/bin/env ruby
+
+# Copyright (c) 2012-2012, John Mettraux, jmettraux@gmail.com
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+
+require 'pp'
+
+
+class Wag
+
+  VERSION = '1.0.0'
+
+  if ENV['WAG_TEST']
+    sdir = File.expand_path('../../spec', __FILE__)
+    VHOME = "#{sdir}/fixtures/vagdir"
+    VMAN = "bundle exec ruby #{sdir}/faker.rb -vboxmanage"
+    VAG = "bundle exec ruby #{sdir}/faker.rb -vagrant"
+  else
+    VHOME = ENV['VAGRANT_HOME'] || '~/vagrant'
+    VMAN = `which VBoxManage`.strip
+    VAG = `which vagrant`.strip
+  end
+
+  SELF = File.basename($0)
+
+  def print_usage
+
+    puts %Q{
+#{SELF} USAGE:
+
+- nada
+    }
+  end
+
+  def list_vms
+
+    `#{VMAN} list vms`.split("\n").collect { |line|
+      m = line.match(/^"([^"]+)"/)
+      m ? m[1] : nil
+    }.compact
+  end
+
+  def lookup_vm(s)
+
+    list_vms.find { |vm| vm == s || vm.match(/^#{s}_/) }
+  end
+
+  def exec(com)
+
+    puts(com)
+    Kernel.exec(com)
+  end
+
+  def vagrant_method(vm, *commands)
+
+    exec(commands.inject([ "cd #{VHOME}/#{vm}" ]) { |a, c|
+      a << "#{VAG} #{c}"
+    }.join(' && '))
+  end
+
+  def vagrant_function(*args)
+
+    exec("#{VAG} #{args.join(' ')}")
+  end
+
+  def vman_function(*args)
+
+    args = args.first if args.first.is_a?(Array)
+
+    exec("#{VMAN} #{args.join(' ')}")
+  end
+
+  def run
+
+    if ARGV.size < 1
+      print_usage; return
+    end
+
+    vm = lookup_vm(ARGV[0])
+
+    comm, args = if vm
+      [ ARGV[1], [ [ ARGV[0], vm ] ] + Array(ARGV[2..-1]) ]
+    else
+      [ ARGV[0], ARGV[1..-1] ]
+    end
+
+    comm ||= 'up_and_ssh' if vm
+    comm = comm.gsub(/-/, '_')
+
+    if respond_to?(comm)
+
+      send(comm, args)
+
+    else
+
+      raise ArgumentError.new(
+        "unknown command #{comm.inspect} " +
+        "- try running \"#{SELF} help\"")
+    end
+  end
+
+  #
+  # the commands
+
+  def help(args)
+
+    # TODO
+  end
+
+  def _v(args)
+
+    puts VERSION
+  end
+
+  alias __version _v
+
+  def _consts(args)
+
+    self.class.constants.sort.each do |con|
+      puts "#{con}: #{self.class.const_get(con).inspect}"
+    end
+  end
+
+  def poweroff(args)
+
+    nick, vm = args.first
+    vman_function('controlvm', vm, 'poweroff')
+  end
+
+  def flatten(type, args)
+
+    args.collect { |e|
+      if e.is_a?(Array)
+        type == :nick ? e.first : e.last
+      else
+        e
+      end
+    }
+  end
+
+  def man(args)
+
+    vman_function(flatten(:vm, args))
+  end
+
+  def vms(args)
+
+    list_vms.each { |vm| puts vm }
+  end
+
+  %w[ box ].each do |c|
+
+    class_eval %Q{
+      def #{c}(args)
+        vagrant_function(*[ #{c.inspect}, *args ])
+      end
+    }
+  end
+
+  def up_and_ssh(args)
+
+    nick, vm = args.first
+    vagrant_method(nick, 'up', 'ssh')
+  end
+
+  %w[ up suspend resume status halt ssh ssh_config ].each do |c|
+
+    class_eval %Q{
+      def #{c}(args)
+        nick, vm = args.first
+        vagrant_method(nick, #{c.inspect})
+      end
+    }
+  end
+end
+
+Wag.new.run #if $0 == __FILE__
+
