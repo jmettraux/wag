@@ -16,7 +16,7 @@ describe 'wag' do
 
     it 'returns the version' do
 
-      (wag '-v').should == VERSION
+      (wag '-v').should == WAG_VERSION
     end
   end
 
@@ -24,7 +24,7 @@ describe 'wag' do
 
     it 'returns the version' do
 
-      (wag '--version').should == VERSION
+      (wag '--version').should == WAG_VERSION
     end
   end
 

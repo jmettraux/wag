@@ -27,16 +27,9 @@ class Wag
 
   VERSION = '1.0.0'
 
-  if ENV['WAG_TEST']
-    sdir = File.expand_path('../../spec', __FILE__)
-    VHOME = "#{sdir}/fixtures/vagdir"
-    VMAN = "bundle exec ruby #{sdir}/faker.rb -vboxmanage"
-    VAG = "bundle exec ruby #{sdir}/faker.rb -vagrant"
-  else
-    VHOME = ENV['VAGRANT_HOME'] || '~/vagrant'
-    VMAN = `which VBoxManage`.strip
-    VAG = `which vagrant`.strip
-  end
+  VHOME = ENV['WAG_HOME'] || '~/vagrant'
+  VMAN = ENV['WAG_VMAN'] || `which VBoxManage`.strip
+  VAG = ENV['WAG_VAG'] || `which vagrant`.strip
 
   SELF = File.basename($0)
 
