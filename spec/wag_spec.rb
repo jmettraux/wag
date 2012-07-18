@@ -158,5 +158,15 @@ redhat5_2
       r.should == "-vagrant #{SDIR}/fixtures/vagdir/vm ssh"
     end
   end
+
+  describe 'wag vm poweroff' do
+
+    it 'powers off the vm' do
+
+      r = wag 'vm poweroff'
+
+      r.should == "-vboxmanage controlvm vm_1234 poweroff"
+    end
+  end
 end
 
