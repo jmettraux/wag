@@ -24,6 +24,13 @@ for your Vagrant vms.
 TODO.
 
 
+## install ##
+
+    curl -L http://git.io/raw > wag
+    chmod a+x wag
+    mv wag to/somewhere/in/your/path
+
+
 ## license ##
 
 MIT (see LICENSE.txt)
