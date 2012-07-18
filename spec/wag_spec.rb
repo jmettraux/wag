@@ -175,7 +175,23 @@ redhat5_2
 
       r = wag 'vm network'
 
-      r.should == "config.vm.network :hostonly, '10.0.2.7'"
+      r.should == %{
+config.vm.network :hostonly, '10.0.2.7'
+      }.strip
+    end
+  end
+
+  describe 'wag vm network' do
+
+    it 'displays the settings out of the Vagrantfile' do
+
+      r = wag 'vm config'
+
+      r.should == %{
+config.vm.box = 'squeeze64'
+config.vm.customize [ 'modifyvm', :id, '--memory', 1024 ]
+config.vm.network :hostonly, '10.0.2.7'
+      }.strip
     end
   end
 end

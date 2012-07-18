@@ -295,12 +295,23 @@ class Wag
     vagrant_method(vm.nick, 'ssh')
   end
 
-  # greps the vm network setting out of its Vagrantfile
+  # greps the vm network settings out of the Vagrantfile
   #
   def wm_network(vm)
 
     File.readlines(File.join(VHOME, vm.nick, 'Vagrantfile')).select { |l|
-      l.match(/^\s+config.vm.network /)
+      l.match(/^\s+config\.vm\.network /)
+    }.each { |l|
+      echo(l.strip)
+    }
+  end
+
+  # greps the vm settings out of the Vagrantfile
+  #
+  def wm_config(vm)
+
+    File.readlines(File.join(VHOME, vm.nick, 'Vagrantfile')).select { |l|
+      l.match(/^\s+config\./)
     }.each { |l|
       echo(l.strip)
     }
