@@ -228,6 +228,18 @@ config.vm.network :hostonly, '10.0.2.7'
 
   context 'when next to the Vagrantfile' do
 
+    describe 'wag' do
+
+      it 'ups the vm and sshs into it' do
+
+        r = wag nil, true
+
+        r.should ==
+          "-vagrant /Users/jmettraux/w/wag/spec/fixtures/vagdir/vm up\n" +
+          "-vagrant /Users/jmettraux/w/wag/spec/fixtures/vagdir/vm ssh"
+      end
+    end
+
     describe 'wag ssh' do
 
       it 'sshs into the vm' do

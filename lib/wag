@@ -126,13 +126,13 @@ class Wag
   #
   def run
 
-    return print_usage if ARGV.size < 1
-
     vm = lookup_vm(ARGV[0])
     localvm = lookup_local_vm
     localvm = nil if vm
 
-    ARGV << 'up_and_ssh' if vm && ARGV[1].nil?
+    if (vm && ARGV[1].nil?) || (localvm && ARGV[0].nil?)
+      ARGV << 'up_and_ssh'
+    end
 
     rmeths = lookup_rmeths(ARGV)
     meth = get_method(localvm ? rmeths[0] : rmeths[1])
@@ -166,8 +166,7 @@ class Wag
       com = vm ? ARGV[1] : ARGV[0]
 
       raise ArgumentError.new(
-        "unknown command #{com.inspect} " +
-        "- try running \"#{SELF} help\"")
+        "unknown command #{com.inspect} - try running \"#{SELF} help\"")
     end
   end
 
