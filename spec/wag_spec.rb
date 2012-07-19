@@ -114,6 +114,19 @@ vm                  vm_1234             12345678-1234-1234-1234-123456789000
     end
   end
 
+  describe 'wag statuses' do
+
+    it 'lists the vms and their statuses' do
+
+      r = wag 'statuses'
+
+      r.should == %{
+NICK                NAME                UUID                                 STATE
+vm                  vm_1234             12345678-1234-1234-1234-123456789000 inaccessible
+      }.strip
+    end
+  end
+
   describe 'wag boxes' do
 
     it 'prints the list of boxes available' do

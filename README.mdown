@@ -60,6 +60,12 @@ Commands you can run from any work directory:
     wag work0 config
     wag work0 network # only the network config
 
+    # to list the vms managed
+    wag vms
+
+    # to list the vms managed and their statuses
+    wag statuses
+
     # ...
 
 Commands you can run when you're in the same dir as the vm's Vagrant file:

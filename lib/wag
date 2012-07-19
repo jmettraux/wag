@@ -100,6 +100,11 @@ class Wag
     exec("#{VAG} #{args.join(' ')}")
   end
 
+  def vman_query(*args)
+
+    `#{VMAN} #{args.join(' ')}`.strip
+  end
+
   def vman_function(*args)
 
     args = args.first if args.first.is_a?(Array)
@@ -258,6 +263,25 @@ class Wag
 
     vms.each do |vm|
       printf(format, *[ vm.nick, vm.name, vm.uuid ])
+    end
+  end
+
+  # lists the vms and their current statuses
+  #
+  def wf_statuses
+
+    format = blue("%-19s %-19s %-36s %s\n")
+
+    printf(format, *%w[ NICK NAME UUID STATE ])
+
+    vms.each do |vm|
+
+      info = vman_query('showvminfo', vm.name, '--machinereadable')
+
+      state = info.split("\n").find { |l| l.match(/VMState=\"/) }
+      state = state ? state.match(/\"([^\"]+)\"$/)[1] : 'inaccessible'
+
+      printf(format, *[ vm.nick, vm.name, vm.uuid, state ])
     end
   end
 
