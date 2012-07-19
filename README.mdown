@@ -8,6 +8,23 @@ A helper script around the "vagrant" and "VBoxManage" commands.
 Tested with Vagrant 1.0.3.
 
 
+## motivation ##
+
+I was tired of cding into my guest Vagrantfile's directory. I wanted to simply do
+
+    wag myvm ssh
+
+to SSH into it.
+
+I was also playing with special network settings and I got tired of having to type "VBoxManage controlvm myvm_fullanme poweroff" when I needed to shutdown an unreachable guest, so
+
+    wag myvm poweroff
+
+is sufficient.
+
+There are other small niceties.
+
+
 ## usage ##
 
 Wag assumes you have a structure like
