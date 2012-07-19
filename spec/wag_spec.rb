@@ -239,6 +239,16 @@ config.vm.network :hostonly, '10.0.2.7'
     end
   end
 
+  describe 'wag vm log' do
+
+    it 'displays the latest log for the vm' do
+
+      r = wag 'vm log'
+
+      r.should == "-vboxmanage showvminfo vm_1234 --log 0"
+    end
+  end
+
   context 'when next to the Vagrantfile' do
 
     describe 'wag' do

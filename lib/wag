@@ -285,6 +285,13 @@ class Wag
     end
   end
 
+  # prints the current log for the vm
+  #
+  def mm_log(vm)
+
+    vman_function('showvminfo', vm.name, '--log', '0')
+  end
+
   # a shortcut to "wag box list"
   #
   def vf_boxes
