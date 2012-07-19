@@ -38,9 +38,46 @@ Wag assumes you have a structure like
     └── test2
         └── Vagrantfile
 
-for your Vagrant vms.
+for your Vagrant virtual machines.
 
-TODO.
+Commands you can run from any work directory:
+
+    # to "up" the work0 vm
+    wag work0 up
+
+    # to "up" and immediately ssh into work0
+    wag work0
+
+    # to shut down the test2 vm
+    wag test2 halt
+      # or (as opposed to "up")
+    wag test2 down
+
+    # to power off the vm (hard shutdown, ultima ratio regi)
+    wag test2 poweroff
+
+    # to list the config (Vagrantfile summary) of a vm
+    wag work0 config
+    wag work0 network # only the network config
+
+    # ...
+
+Commands you can run when you're in the same dir as the vm's Vagrant file:
+
+    # to "up" the vm
+    wag up
+
+    # to ssh into the machine
+    wag ssh
+
+    # to make sure the vm is up and ssh into it
+    wag
+
+    # ...
+
+### advanced commands ###
+
+TODO
 
 
 ## install ##
@@ -48,6 +85,7 @@ TODO.
     curl -L http://git.io/raw > wag
     chmod a+x wag
     mv wag to/somewhere/in/your/path
+    wag -v
 
 
 ## license ##
