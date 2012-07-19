@@ -60,6 +60,9 @@ Commands you can run from any work directory:
     wag work0 config
     wag work0 network # only the network config
 
+    # to print the current vm log
+    wag work0 log
+
     # to list the vms managed
     wag vms
 
